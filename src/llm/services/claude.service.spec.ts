@@ -31,9 +31,12 @@ describe('ClaudeService', () => {
 
   it('should evaluate answer successfully', async () => {
     const requestDto: LlmRequestDTO = {
-      question: 'What is 2 + 2?',
-      answer: '4',
-      rubrics: ['The answer should be 4.'],
+      question: 'What is polymorphism in object-oriented programming?',
+      answer: 'Polymorphism is the ability of an object to take on many forms.',
+      rubrics: [
+        { id: '1', title: 'Definition Accuracy', points: '0.5' },
+        { id: '2', title: 'Clarity of Explanation', points: '0.5' },
+      ],
     };
 
     const mockResponse = {
@@ -41,7 +44,9 @@ describe('ClaudeService', () => {
         {
           text: JSON.stringify({
             status: Status.CORRECT,
-            feedback: 'Good job!',
+            feedback: 'Great job! Your answer meets all the rubric criteria.',
+            passedRubrics: ['1', '2'],
+            failedRubrics: [],
             hint: null,
           }),
         },
@@ -56,7 +61,9 @@ describe('ClaudeService', () => {
 
     expect(result).toEqual({
       status: Status.CORRECT,
-      feedback: 'Good job!',
+      feedback: 'Great job! Your answer meets all the rubric criteria.',
+      passedRubrics: ['1', '2'],
+      failedRubrics: [],
       hint: null,
     });
     expect(anthropicClientMock.messages.create).toHaveBeenCalled();
@@ -64,9 +71,12 @@ describe('ClaudeService', () => {
 
   it('should handle API error', async () => {
     const requestDto: LlmRequestDTO = {
-      question: 'What is 2 + 2?',
-      answer: '4',
-      rubrics: ['The answer should be 4.'],
+      question: 'What is polymorphism in object-oriented programming?',
+      answer: 'Polymorphism is the ability of an object to take on many forms.',
+      rubrics: [
+        { id: '1', title: 'Definition Accuracy', points: '0.5' },
+        { id: '2', title: 'Clarity of Explanation', points: '0.5' },
+      ],
     };
 
     (anthropicClientMock.messages.create as jest.Mock).mockRejectedValue(

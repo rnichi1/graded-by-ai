@@ -44,6 +44,15 @@ $ yarn test:e2e
 $ yarn test:cov
 ```
 
+The app will be running on `http://localhost:4000`
+
+## API Docs
+
+```bash
+# Swagger
+http://localhost:4000/api-docs#/
+```
+
 ## License
 
 [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).

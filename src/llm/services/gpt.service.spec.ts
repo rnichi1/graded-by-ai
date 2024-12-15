@@ -35,7 +35,14 @@ describe('GptService', () => {
     const requestDto: LlmRequestDTO = {
       question: 'What is 2 + 2?',
       answer: '4',
-      rubrics: ['The answer should be 4.'],
+      modelSolution: '4',
+      minPoints: 0,
+      pointStep: 0.5,
+      maxPoints: 1,
+      rubrics: [
+        { id: '1', title: 'Definition Accuracy', points: '0.5' },
+        { id: '2', title: 'Clarity of Explanation', points: '0.5' },
+      ],
     };
 
     const mockResponse = {
@@ -71,7 +78,14 @@ describe('GptService', () => {
     const requestDto: LlmRequestDTO = {
       question: 'What is 2 + 2?',
       answer: '4',
-      rubrics: ['The answer should be 4.'],
+      modelSolution: '4',
+      minPoints: 0,
+      pointStep: 0.5,
+      maxPoints: 1,
+      rubrics: [
+        { id: '1', title: 'Definition Accuracy', points: '0.5' },
+        { id: '2', title: 'Clarity of Explanation', points: '0.5' },
+      ],
     };
 
     // Cast parse as a jest function so mockRejectedValue can be used

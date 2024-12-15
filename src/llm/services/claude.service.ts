@@ -44,18 +44,39 @@ export class ClaudeService implements LlmServiceInterface {
     }
   }
 
-  private buildPrompt({ question, answer, rubrics }: LlmRequestDTO): string {
+  private buildPrompt({
+    question,
+    answer,
+    rubrics,
+    maxPoints,
+    pointStep,
+    minPoints,
+    modelSolution,
+  }: LlmRequestDTO): string {
     const rubricsText = rubrics?.join('\n');
     return `Please evaluate the following student answer based on the provided rubrics.
 
+         
           Question:
           ${question}
           
           Answer:
           ${answer}
           
+          Max Points:
+          ${maxPoints}
+          
+          Min Points:
+          ${minPoints}
+          
+          Point Step:
+          ${pointStep}
+          
           Rubrics:
-          ${rubricsText}
+          ${rubricsText ?? 'N/A'}
+          
+          Model Solution:
+          ${modelSolution ?? 'N/A'}
           
           Your evaluation should be in the following JSON format without any additional text:
           
@@ -63,6 +84,9 @@ export class ClaudeService implements LlmServiceInterface {
             "status": "correct" or "incorrect" or "incomplete",
             "feedback": "Your feedback here.",
             "hint": "Optional hint."
+            "passedRubrics": ["id1", "id2"],
+            "failedRubrics": ["id3", "id4"],
+            "points": 1
           }
     `;
   }
@@ -77,8 +101,18 @@ export class ClaudeService implements LlmServiceInterface {
       const status = data.status as Status;
       const feedback = data.feedback;
       const hint = data.hint;
+      const passedRubricsIds = data.passedRubrics;
+      const failedRubricsIds = data.failedRubrics;
+      const points = data.points;
 
-      return { status, feedback, hint };
+      return {
+        status,
+        feedback,
+        hint,
+        failedRubricsIds,
+        passedRubricsIds,
+        points,
+      };
     } catch (error) {
       this.logger.error('Error parsing Claude response', error);
       throw new InternalServerErrorException('Failed to parse LLM response');

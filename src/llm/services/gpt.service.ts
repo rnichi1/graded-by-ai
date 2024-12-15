@@ -54,9 +54,23 @@ export class GptService implements LlmServiceInterface {
     }
   }
 
-  private buildPrompt({ rubrics, question, answer }: LlmRequestDTO): string {
-    const rubricsText = rubrics?.join('\n');
-    return `Please evaluate the following student answer based on the provided rubrics.
+  private buildPrompt({
+    rubrics,
+    question,
+    answer,
+    modelSolution,
+    maxPoints,
+    pointStep,
+    minPoints,
+  }: LlmRequestDTO): string {
+    const rubricsText = rubrics
+      ?.map(
+        (rubric) =>
+          `ID: ${rubric.id}, Title: ${rubric.title}, Points: ${rubric.points}`,
+      )
+      .join('\n'); // Join each rubric string with a newline
+
+    return `Please evaluate the following student answer based on the provided rubrics and model solution (If they are provided).
 
           Question:
           ${question}
@@ -64,8 +78,20 @@ export class GptService implements LlmServiceInterface {
           Answer:
           ${answer}
           
+          Max Points:
+          ${maxPoints}
+          
+          Min Points:
+          ${minPoints}
+          
+          Point Step:
+          ${pointStep}
+          
           Rubrics:
-          ${rubricsText}
+          ${rubricsText ?? 'N/A'}
+          
+          Model Solution:
+          ${modelSolution ?? 'N/A'}
       `;
   }
 }
