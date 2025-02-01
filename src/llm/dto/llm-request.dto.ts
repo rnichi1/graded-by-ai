@@ -9,6 +9,26 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
+export class FewShotExampleDTO {
+  @ApiProperty({
+    description: 'The answer provided in the few-shot example',
+    example: 'Polymorphism is the ability of an object to take on many forms.',
+  })
+  @IsNotEmptyString()
+  answer: string;
+
+  @ApiProperty({
+    description:
+      'The human-assigned grading for the example, provided as a stringified JSON. It can either be an integer or an array of rubric scores.',
+    example: JSON.stringify([
+      { rubric_id: '1', points_assigned: 0.5 },
+      { rubric_id: '2', points_assigned: 1.0 },
+    ]),
+  })
+  @IsNotEmptyString()
+  points: string; // Stringified JSON for flexibility. This can be either a JSON or just a number
+}
+
 class RubricDTO {
   @ApiProperty({
     description: 'The ID of the rubric',
@@ -82,7 +102,7 @@ export class LlmRequestDTO {
   })
   @IsOptional()
   @IsNumber()
-  @Min(1)
+  @Min(0.25)
   maxPoints?: number = 1;
 
   @ApiProperty({
@@ -105,4 +125,84 @@ export class LlmRequestDTO {
   @IsNumber()
   @Min(0)
   pointStep?: number = 0.5;
+
+  @ApiProperty({
+    description:
+      'Indicates whether chain-of-thought prompting should be applied. Is default true as it increases accuracy.',
+    example: true,
+    default: true,
+  })
+  @IsOptional()
+  chainOfThought?: boolean = true;
+
+  @ApiProperty({
+    description: 'The number of llm calls before confirming a final vote',
+    example: 3,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  votingCount?: number = 1;
+
+  @ApiProperty({
+    description:
+      'Temperature parameter for controlling diversity in LLM outputs. Lower values are more deterministic.',
+    example: 0.2,
+    default: 0.2,
+  })
+  @IsOptional()
+  @IsNumber()
+  temperature?: number = 0.2;
+
+  @ApiProperty({
+    description:
+      'Few-shot examples to provide context to the LLM for evaluation. Each example contains an answer and the corresponding human-assigned grading.',
+    example: [
+      {
+        answer:
+          'Polymorphism allows objects of different types to be treated uniformly.',
+        points: JSON.stringify([
+          { rubric_id: '1', points_assigned: 0.5 },
+          { rubric_id: '2', points_assigned: 0.5 },
+        ]),
+      },
+      {
+        answer: 'Polymorphism enables method overriding in child classes.',
+        points: JSON.stringify(1),
+      },
+    ],
+    required: false,
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => FewShotExampleDTO)
+  @IsOptional()
+  fewShotExamples?: FewShotExampleDTO[];
+
+  @ApiProperty({
+    description: 'Custom prompt text to be added before the context prompt',
+    example: 'You are an expert in computer science education.',
+    required: false,
+  })
+  @IsOptional()
+  @IsNotEmptyString()
+  prePrompt?: string;
+
+  @ApiProperty({
+    description: 'Custom prompt text to replace the default context prompt',
+    example: 'As an educational evaluator, assess the following answer based on accuracy and clarity.',
+    required: false,
+  })
+  @IsOptional()
+  @IsNotEmptyString()
+  prompt?: string;
+
+  @ApiProperty({
+    description: 'Custom prompt text to be added after the context prompt',
+    example: 'Focus particularly on technical accuracy in your evaluation.',
+    required: false,
+  })
+  @IsOptional()
+  @IsNotEmptyString()
+  postPrompt?: string;
 }

@@ -1,4 +1,7 @@
-# compiled output
+# Redis
+dump.rdb
+
+# Compiled output
 /dist
 /node_modules
 /build
@@ -42,6 +45,7 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+.env.test
 
 # temp directory
 .temp

@@ -4,15 +4,15 @@ import { z } from 'zod';
 
 export class EvaluateResponseDTO {
   @ApiProperty({
+    description: 'Feedback provided on the answer',
+  })
+  feedback: string;
+
+  @ApiProperty({
     enum: Status,
     description: 'Indicates if the answer is correct, incorrect, or incomplete',
   })
   status: Status;
-
-  @ApiProperty({
-    description: 'Feedback provided on the answer',
-  })
-  feedback: string;
 
   @ApiProperty({
     description: 'Points awarded for the answer',
@@ -26,23 +26,21 @@ export class EvaluateResponseDTO {
   hint?: string;
 
   @ApiProperty({
-    description: 'Rubrics the student passed',
-    example: ['1', '2'],
+    description: 'Voting Result evaluated through multiple llm calls',
+    example: 'ALL_SAME',
   })
-  passedRubricsIds: string[];
+  votingResult?: VotingResult;
+}
 
-  @ApiProperty({
-    description: 'Rubrics the student failed',
-    example: ['3'],
-  })
-  failedRubricsIds: string[];
+export enum VotingResult {
+  ALL_SAME = 'ALL_SAME',
+  PARTIAL_AGREEMENT = 'PARTIAL_AGREEMENT',
+  ALL_DIFFERENT = 'ALL_DIFFERENT',
 }
 
 export const EvaluateResponseSchema = z.object({
-  status: z.enum([Status.CORRECT, Status.INCORRECT, Status.INCOMPLETE]),
   feedback: z.string(),
-  hint: z.string().optional(),
-  points: z.number().optional(),
-  passedRubricsIds: z.array(z.string()),
-  failedRubricsIds: z.array(z.string()),
+  status: z.enum([Status.CORRECT, Status.INCORRECT, Status.INCOMPLETE]),
+  hint: z.string(),
+  points: z.number(),
 });
