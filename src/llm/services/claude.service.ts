@@ -146,10 +146,7 @@ export class ClaudeService implements LlmServiceInterface {
     return `Please evaluate the following student answer based on the provided rubrics and model solution (if they are provided).
           
           ${chainOfThoughtText}
-          
-          Answer you need to score:
-          
-          ${answer}
+        
           
           Exercise that the student had to solve:
           ${question}
@@ -179,6 +176,11 @@ export class ClaudeService implements LlmServiceInterface {
           ${modelSolution}`
               : ''
           }
+          
+            
+          Student answer you need to score:
+          
+          ${answer}
           
           Your evaluation should be in the following JSON format without any additional text:
           

@@ -9,7 +9,6 @@ import { LlmServiceInterface } from '../interfaces/llm.service.interface';
 import {
   EvaluateResponseDTO,
   EvaluateResponseSchema,
-  VotingResult,
 } from '../../evaluate/dto/evaluate-response-d-t.o';
 import { LlmRequestDTO } from '../dto/llm-request.dto';
 import { zodResponseFormat } from 'openai/helpers/zod';
@@ -151,10 +150,6 @@ export class GptService implements LlmServiceInterface {
           
           ${chainOfThoughtText}
           
-          Answer you need to score:
-          
-          ${answer}  
-          
           Exercise that the student had to solve:
           ${question}
           
@@ -179,9 +174,12 @@ export class GptService implements LlmServiceInterface {
           ${modelSolution}`
                 : ''
             }
-    
-               
+            
+                      
+          Student answer you need to score:
           
+          ${answer}  
+    
       `;
   }
 }

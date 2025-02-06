@@ -34,9 +34,9 @@ export class QueueService {
     result?: EvaluateResponseDTO;
   }> {
     this.logger.debug(`Checking status for job: ${jobId}`);
-    
+
     const job = await this.evaluationQueue.getJob(jobId);
-    
+
     if (!job) {
       this.logger.warn(`Job not found: ${jobId}`);
       return { status: 'not_found' };
