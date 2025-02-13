@@ -10,10 +10,7 @@ import { Anthropic } from '@anthropic-ai/sdk';
 import { LlmRequestDTO } from '../dto/llm-request.dto';
 import { Status } from '../../enum/status';
 import { context } from '../../constants/llmContext';
-import {
-  EvaluateResponseDTO,
-  VotingResult,
-} from '../../evaluate/dto/evaluate-response-d-t.o';
+import { EvaluateResponseDTO } from '../../evaluate/dto/evaluate-response-d-t.o';
 import { classifyVoting } from '../utils/voting.utils';
 
 @Injectable()
@@ -24,7 +21,7 @@ export class ClaudeService implements LlmServiceInterface {
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('ANTHROPIC_API_KEY');
     this.anthropicClient = new Anthropic({
-      apiKey,
+      apiKey: apiKey ?? '',
     });
   }
 
@@ -32,6 +29,14 @@ export class ClaudeService implements LlmServiceInterface {
     const userPrompt = this.buildPrompt(requestDto);
     const votingCount = requestDto.votingCount ?? 1;
     const responses: EvaluateResponseDTO[] = [];
+
+    if (requestDto.apiKey) {
+      this.anthropicClient.apiKey = requestDto.apiKey;
+    } else {
+      this.logger.warn(
+        'No API key provided in the request. Using the default API key.',
+      );
+    }
 
     try {
       for (let i = 0; i < votingCount; i++) {
@@ -41,6 +46,7 @@ export class ClaudeService implements LlmServiceInterface {
           requestDto.prePrompt,
           requestDto.postPrompt,
           requestDto.prompt,
+          requestDto.llmModel,
         );
         if (response) {
           responses.push(response);
@@ -68,6 +74,7 @@ export class ClaudeService implements LlmServiceInterface {
     prePrompt: string = '',
     postPrompt: string = '',
     contextPrompt: string = context,
+    llmModel?: string,
   ): Promise<EvaluateResponseDTO | null> {
     const maxRetries = 3;
     const retryDelay = 5000;
@@ -75,7 +82,7 @@ export class ClaudeService implements LlmServiceInterface {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const response = await this.anthropicClient.messages.create({
-          model: 'claude-3-5-sonnet-latest',
+          model: llmModel ?? 'claude-3-5-sonnet-latest',
           messages: [{ role: 'user', content: prompt }],
           system: `${prePrompt} ${contextPrompt} ${postPrompt}`,
           temperature: temperature ?? 0.2,

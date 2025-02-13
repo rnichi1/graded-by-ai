@@ -22,13 +22,22 @@ export class GptService implements LlmServiceInterface {
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
-    this.client = new OpenAI({ apiKey });
+    this.client = new OpenAI({ apiKey: apiKey ?? '' });
   }
 
   async evaluate(requestDto: LlmRequestDTO): Promise<EvaluateResponseDTO> {
     const userPrompt = this.buildPrompt(requestDto);
     const votingCount = requestDto.votingCount ?? 1;
     const responses: EvaluateResponseDTO[] = [];
+
+    // Replace the API key if it is provided in the request
+    if (requestDto.apiKey) {
+      this.client.apiKey = requestDto.apiKey;
+    } else {
+      this.logger.warn(
+        'No API key provided in the request. Using the default API key.',
+      );
+    }
 
     try {
       for (let i = 0; i < votingCount; i++) {
@@ -38,6 +47,7 @@ export class GptService implements LlmServiceInterface {
           requestDto.prePrompt,
           requestDto.postPrompt,
           requestDto.prompt,
+          requestDto.llmModel,
         );
         if (response) {
           responses.push(response);
@@ -65,6 +75,7 @@ export class GptService implements LlmServiceInterface {
     prePrompt: string = '',
     postPrompt: string = '',
     contextPrompt: string = context,
+    llmModel?: string,
   ): Promise<EvaluateResponseDTO | null> {
     const maxRetries = 3;
     const retryDelay = 5000; // 5 seconds
@@ -72,7 +83,7 @@ export class GptService implements LlmServiceInterface {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const response = await this.client.beta.chat.completions.parse({
-          model: 'gpt-4o-mini',
+          model: llmModel ?? 'gpt-4o-mini',
           messages: [
             {
               role: 'system',

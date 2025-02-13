@@ -9,7 +9,7 @@ export class EvaluateRequestDTO extends LlmRequestDTO {
   @ApiPropertyOptional({
     description: 'Which LLM model to use for evaluation.',
     enum: LlmType,
-    default: LlmType.GPT,
+    default: LlmType.CLAUDE,
   })
   llmType?: LlmType;
 }

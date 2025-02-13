@@ -8,7 +8,9 @@ dotenv.config({ path: '.env.test' });
 async function setupTestEnvironment() {
   try {
     console.log('Setting up test environment...');
-    console.log(`Redis config - Host: ${process.env.REDIS_HOST}, Port: ${process.env.REDIS_PORT}`);
+    console.log(
+      `Redis config - Host: ${process.env.REDIS_HOST}, Port: ${process.env.REDIS_PORT}`,
+    );
 
     // Check Redis using actual connection
     const client = Redis.createClient({
@@ -26,7 +28,7 @@ async function setupTestEnvironment() {
     } catch (error) {
       console.error('✗ Redis connection failed:', error);
       console.log('Starting Redis container...');
-      
+
       try {
         // Stop any existing container first
         try {
@@ -38,10 +40,10 @@ async function setupTestEnvironment() {
         // Start new container
         execSync('docker-compose -f docker-compose.test.yml up -d redis');
         console.log('Redis container started successfully');
-        
+
         // Wait for Redis to be ready
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
         // Try connecting again
         await client.connect();
         console.log('✓ Redis is now running and connected');

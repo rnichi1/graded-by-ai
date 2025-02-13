@@ -1,9 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmptyString } from '../../decorators/IsNotEmptyString';
 import {
   IsArray,
-  IsOptional,
   IsNumber,
+  IsString,
+  isString,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -68,7 +69,7 @@ export class LlmRequestDTO {
   @IsNotEmptyString()
   answer: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Optional rubrics to evaluate the answer against',
     example: [
       {
@@ -77,84 +78,74 @@ export class LlmRequestDTO {
         points: 0.5,
       },
     ],
-    required: false,
     type: [RubricDTO],
   })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => RubricDTO) // Required for nested validation
-  @IsOptional()
   rubrics?: RubricDTO[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Optional model solution for comparison',
     example:
       'Polymorphism in OOP allows objects of different types to be treated as objects of a common super type.',
-    required: false,
   })
-  @IsOptional()
   modelSolution?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The maximum points that can be awarded for this evaluation',
     example: 2,
     default: 1,
   })
-  @IsOptional()
   @IsNumber()
   @Min(0.25)
   maxPoints?: number = 1;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The minimum points that can be awarded for this evaluation',
     example: 0,
     default: 0,
   })
-  @IsOptional()
   @IsNumber()
   @Min(0)
   minPoints?: number = 0;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'The step increment for the points (e.g., 0.5 for half points)',
     example: 0.5,
     default: 0.5,
   })
-  @IsOptional()
   @IsNumber()
   @Min(0)
   pointStep?: number = 0.5;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'Indicates whether chain-of-thought prompting should be applied. Is default true as it increases accuracy.',
     example: true,
     default: true,
   })
-  @IsOptional()
   chainOfThought?: boolean = true;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The number of llm calls before confirming a final vote',
     example: 3,
   })
-  @IsOptional()
   @IsNumber()
   @Min(1)
   votingCount?: number = 1;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'Temperature parameter for controlling diversity in LLM outputs. Lower values are more deterministic.',
     example: 0.2,
     default: 0.2,
   })
-  @IsOptional()
   @IsNumber()
   temperature?: number = 0.2;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'Few-shot examples to provide context to the LLM for evaluation. Each example contains an answer and the corresponding human-assigned grading.',
     example: [
@@ -176,33 +167,42 @@ export class LlmRequestDTO {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => FewShotExampleDTO)
-  @IsOptional()
   fewShotExamples?: FewShotExampleDTO[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Custom prompt text to be added before the context prompt',
     example: 'You are an expert in computer science education.',
     required: false,
   })
-  @IsOptional()
-  @IsNotEmptyString()
   prePrompt?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Custom prompt text to replace the default context prompt',
-    example: 'As an educational evaluator, assess the following answer based on accuracy and clarity.',
+    example:
+      'As an educational evaluator, assess the following answer based on accuracy and clarity.',
     required: false,
   })
-  @IsOptional()
-  @IsNotEmptyString()
   prompt?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Custom prompt text to be added after the context prompt',
     example: 'Focus particularly on technical accuracy in your evaluation.',
     required: false,
   })
-  @IsOptional()
-  @IsNotEmptyString()
   postPrompt?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'API Key for the LLM service. Make sure to pass the API key of the selected model family.',
+    example: 'YOU_API_KEY',
+    required: false,
+  })
+  apiKey: string;
+
+  // Concrete Llm Model
+  @ApiPropertyOptional({
+    description: 'Which LLM model to use for evaluation.',
+    default: 'claude-3-5-sonnet-latest',
+  })
+  llmModel?: string;
 }
